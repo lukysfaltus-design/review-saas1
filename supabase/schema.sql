@@ -22,6 +22,8 @@ create table feedback (
   stars int not null check (stars between 1 and 5),
   customer_name text,
   message text,
+  resolved boolean default false,
+  resolved_at timestamptz,
   created_at timestamptz default now()
 );
 

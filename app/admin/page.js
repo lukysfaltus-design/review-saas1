@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import ClientTable from './ClientTable';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,24 +32,7 @@ export default async function AdminHome() {
           <Link className="button" href="/admin/new">+ Nový klient</Link>{' '}
           <Link className="button" href="/admin/nfc" style={{ marginLeft: 8, background: '#1E5A66' }}>Zapsat NFC kartu</Link>
         </p>
-        <table>
-          <thead>
-            <tr><th>Firma</th><th>Za 7 dní</th><th>Průměr</th><th></th></tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr><td colSpan="4" className="sub">Zatím žádní klienti.</td></tr>
-            )}
-            {rows.map(b => (
-              <tr key={b.id}>
-                <td>{b.name}</td>
-                <td>{b.weekCount}</td>
-                <td>{b.weekAvg}</td>
-                <td><Link href={'/admin/' + b.slug}>Detail</Link></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ClientTable rows={rows} />
       </div>
     </div>
   );

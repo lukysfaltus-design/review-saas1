@@ -107,6 +107,24 @@ V adminu pak u konkrétního klienta (`/admin/nazev-firmy`) klikněte na
 
 Po uložení se to hned projeví na `/r/nazev-firmy`.
 
+## Krok 9 — vyřešené zprávy, hledání a export
+V databázi přibyl u zpráv sloupec "vyřešeno". Pokud jste `schema.sql`
+spouštěli už dřív, spusťte navíc v Supabase SQL Editoru soubor
+`supabase/migration_resolved.sql` (opět jen doplní sloupec, nic
+nesmaže).
+
+Co to přidává:
+- **U detailu klienta** (`/admin/nazev-firmy`) je teď nahoře přepínač
+  Nevyřešené / Vyřešené / Vše, a u každé zprávy tlačítko "Označit jako
+  vyřešené". Ve výchozím stavu se ukazují jen nevyřešené, ať se vám
+  inbox nezaplní starými věcmi.
+- **Tlačítko "Stáhnout CSV"** na téže stránce — stáhne všechny zprávy
+  daného klienta (datum, hvězdy, jméno, text, stav) jako soubor, který
+  jde rovnou otevřít v Excelu.
+- **Hledání a řazení** na hlavní stránce `/admin` — políčko pro
+  hledání podle jména firmy a rozbalovací nabídka pro řazení (nejnovější
+  / podle jména / podle aktivity za posledních 7 dní).
+
 ## Co v systému záměrně (zatím) není
 - Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
   neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy
