@@ -1,10 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { T, detectLang } from '@/lib/i18n';
+import LangToggle from '../../LangToggle';
 
 export default function MenuPage({ params }) {
   const { slug } = params;
+  const [lang, setLang] = useState('cs');
   const [data, setData] = useState(null);
   const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => { setLang(detectLang()); }, []);
 
   useEffect(() => {
     fetch('/api/menu/' + slug)
@@ -13,14 +18,19 @@ export default function MenuPage({ params }) {
       .catch(() => setNotFound(true));
   }, [slug]);
 
-  if (notFound) return <div className="wrap"><div className="card">Tuto stránku jsme nenašli.</div></div>;
-  if (!data) return <div className="wrap"><div className="card">Načítám…</div></div>;
+  const t = T[lang].menu;
+  const c = T[lang].common;
+
+  if (notFound) return <div className="wrap"><div className="card">{c.notFound}</div></div>;
+  if (!data) return <div className="wrap"><div className="card">{c.loading}</div></div>;
 
   const accent = data.business.accent_color || '#2F7DFF';
 
   return (
     <div className="wrap" style={{ '--accent': accent }}>
       <div className="card">
+        <LangToggle lang={lang} setLang={setLang} />
+
         {data.business.logo_url && (
           <img
             src={data.business.logo_url}
@@ -29,10 +39,10 @@ export default function MenuPage({ params }) {
           />
         )}
         <h1 style={{ textAlign: 'center' }}>{data.business.name}</h1>
-        <p className="sub" style={{ textAlign: 'center' }}>Menu</p>
+        <p className="sub" style={{ textAlign: 'center' }}>{t.label}</p>
 
         {data.categories.length === 0 && (
-          <p className="sub" style={{ textAlign: 'center' }}>Menu se právě připravuje.</p>
+          <p className="sub" style={{ textAlign: 'center' }}>{t.preparing}</p>
         )}
 
         {data.categories.map(cat => (
@@ -56,7 +66,7 @@ export default function MenuPage({ params }) {
           href={'/r/' + slug}
           className="button"
           style={{ display: 'block', textAlign: 'center', marginTop: 24, background: accent }}
-        >⭐ Ohodnotit návštěvu</a>
+        >{t.rateButton}</a>
       </div>
     </div>
   );

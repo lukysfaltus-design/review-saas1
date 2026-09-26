@@ -162,6 +162,24 @@ neukázal, i když byl v databázi). Přidal jsem do všech admin stránek a
 API endpointů výslovné direktivy, které tohle napevno vypínají. Není
 potřeba žádná databázová změna, stačí nahrát nový kód.
 
+## Krok 13 — jazyk všude, ne jen na hodnocení
+Přepínač CZ/EN teď funguje na všech třech zákaznických stránkách —
+hodnocení (`/r/slug`), menu (`/m/slug`) i rozcestník (`/c/slug`).
+Administrace (`/admin/...`) zůstává česky, tu používáte jen vy dva.
+Žádná databázová migrace není potřeba, jen nahrát nový kód.
+
+## Krok 14 — barva a logo z fotky
+Ve formuláři pro přidání/úpravu klienta (`/admin/new` a
+`/admin/nazev-firmy/edit`) je teď navíc možnost nahrát fotku (logo
+podniku, fotku interiéru apod.). Prohlížeč z ní automaticky:
+- vytvoří zmenšenou verzi a použije ji jako logo (žádný imgur ani
+  externí hosting není potřeba, obrázek se uloží rovnou v databázi),
+- najde nejvýraznější barvu na fotce a nastaví ji jako barvu podniku.
+
+Barvu i logo jde po nahrání fotky pořád ručně přebít, kdyby se
+nevytáhla přesně to, co chcete. Žádná databázová migrace není
+potřeba, jen nahrát nový kód.
+
 ## Co v systému záměrně (zatím) není
 - Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
   neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy

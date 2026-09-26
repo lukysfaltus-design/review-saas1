@@ -1,10 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { T, detectLang } from '@/lib/i18n';
+import LangToggle from '../../LangToggle';
 
 export default function HubPage({ params }) {
   const { slug } = params;
+  const [lang, setLang] = useState('cs');
   const [biz, setBiz] = useState(null);
   const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => { setLang(detectLang()); }, []);
 
   useEffect(() => {
     fetch('/api/business/' + slug)
@@ -13,14 +18,19 @@ export default function HubPage({ params }) {
       .catch(() => setNotFound(true));
   }, [slug]);
 
-  if (notFound) return <div className="wrap"><div className="card">Tuto stránku jsme nenašli.</div></div>;
-  if (!biz) return <div className="wrap"><div className="card">Načítám…</div></div>;
+  const t = T[lang].hub;
+  const c = T[lang].common;
+
+  if (notFound) return <div className="wrap"><div className="card">{c.notFound}</div></div>;
+  if (!biz) return <div className="wrap"><div className="card">{c.loading}</div></div>;
 
   const accent = biz.accent_color || '#2F7DFF';
 
   return (
     <div className="wrap" style={{ '--accent': accent }}>
       <div className="card">
+        <LangToggle lang={lang} setLang={setLang} />
+
         {biz.logo_url && (
           <img
             src={biz.logo_url}
@@ -37,14 +47,14 @@ export default function HubPage({ params }) {
               display: 'block', textAlign: 'center', padding: '18px', borderRadius: 14,
               background: accent, color: '#fff', fontWeight: 700, fontSize: 17, textDecoration: 'none'
             }}
-          >📋 Menu</a>
+          >{t.menuButton}</a>
           <a
             href={'/r/' + slug}
             style={{
               display: 'block', textAlign: 'center', padding: '18px', borderRadius: 14,
               border: '2px solid var(--line)', color: 'var(--ink)', fontWeight: 700, fontSize: 17, textDecoration: 'none'
             }}
-          >⭐ Ohodnotit nás</a>
+          >{t.rateButton}</a>
         </div>
       </div>
     </div>
