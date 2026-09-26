@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
+
 export async function POST(req) {
   const body = await req.json().catch(() => null);
   if (!body || !body.slug || !body.name) {

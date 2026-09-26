@@ -155,6 +155,13 @@ V `/admin/nfc` teď při výběru klienta navíc zvolíte, jestli se má na
 kartu zapsat "Jen hodnocení" (`/r/slug`) nebo "Menu + hodnocení"
 (`/c/slug`).
 
+## Krok 12 — oprava vytrvalé cache na /admin
+Narazili jsme na to, že se `/admin` stránka nebo API někdy servírovaly
+ze staré mezipaměti i po tvrdém refreshi v prohlížeči (nový klient se
+neukázal, i když byl v databázi). Přidal jsem do všech admin stránek a
+API endpointů výslovné direktivy, které tohle napevno vypínají. Není
+potřeba žádná databázová změna, stačí nahrát nový kód.
+
 ## Co v systému záměrně (zatím) není
 - Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
   neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy

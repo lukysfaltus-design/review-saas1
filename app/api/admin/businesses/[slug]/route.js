@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
+
 export async function GET(req, { params }) {
   const db = supabaseAdmin();
   const { data, error } = await db.from('businesses').select('*').eq('slug', params.slug).single();
