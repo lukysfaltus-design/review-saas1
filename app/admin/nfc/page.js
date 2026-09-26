@@ -6,6 +6,7 @@ export default function NfcWriter() {
   const [slug, setSlug] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   const [mode, setMode] = useState('pick');
+  const [target, setTarget] = useState('review');
   const [status, setStatus] = useState('idle');
   const [log, setLog] = useState('');
   const [supported, setSupported] = useState(true);
@@ -24,7 +25,8 @@ export default function NfcWriter() {
   function targetUrl() {
     if (mode === 'custom') return customUrl.trim();
     if (!slug) return '';
-    return window.location.origin + '/r/' + slug;
+    const path = target === 'hub' ? '/c/' : '/r/';
+    return window.location.origin + path + slug;
   }
 
   async function writeTag() {
@@ -93,16 +95,29 @@ export default function NfcWriter() {
         </div>
 
         {mode === 'pick' && (
-          <select
-            value={slug}
-            onChange={e => setSlug(e.target.value)}
-            style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--line)', font: 'inherit' }}
-          >
-            {businesses.length === 0 && <option value="">Zatím žádní klienti</option>}
-            {businesses.map(b => (
-              <option key={b.slug} value={b.slug}>{b.name}</option>
-            ))}
-          </select>
+          <>
+            <select
+              value={slug}
+              onChange={e => setSlug(e.target.value)}
+              style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--line)', font: 'inherit' }}
+            >
+              {businesses.length === 0 && <option value="">Zatím žádní klienti</option>}
+              {businesses.map(b => (
+                <option key={b.slug} value={b.slug}>{b.name}</option>
+              ))}
+            </select>
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+              <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, border: '1px solid var(--line)', borderRadius: 10, padding: '8px 10px', cursor: 'pointer' }}>
+                <input type="radio" checked={target === 'review'} onChange={() => setTarget('review')} />
+                Jen hodnocení
+              </label>
+              <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, border: '1px solid var(--line)', borderRadius: 10, padding: '8px 10px', cursor: 'pointer' }}>
+                <input type="radio" checked={target === 'hub'} onChange={() => setTarget('hub')} />
+                Menu + hodnocení
+              </label>
+            </div>
+          </>
         )}
 
         {mode === 'custom' && (

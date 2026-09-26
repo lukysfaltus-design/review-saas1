@@ -25,7 +25,8 @@ export default async function BusinessDetail({ params }) {
         <p className="sub">
           Recenzní odkaz pro tuto firmu: <code>/r/{biz.slug}</code><br />
           Zprávy chodí na: {biz.owner_email}<br />
-          <a href={'/admin/' + biz.slug + '/edit'}>Upravit logo, sociální sítě a barvu →</a>
+          <a href={'/admin/' + biz.slug + '/edit'}>Upravit logo, sociální sítě a barvu →</a><br />
+          <a href={'/admin/' + biz.slug + '/menu'}>Upravit menu →</a>
         </p>
         <FeedbackPanel slug={biz.slug} initialRows={fb || []} />
       </div>

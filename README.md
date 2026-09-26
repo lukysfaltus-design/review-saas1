@@ -132,6 +132,29 @@ angličtina) a navíc jde ručně přepnout tlačítkem CZ/EN nahoře na
 stránce. Nevyžaduje to žádnou databázovou migraci ani nové proměnné —
 stačí nahrát nový kód.
 
+## Krok 11 — menu na kartě
+Přidal jsem plnohodnotné menu, editovatelné v adminu, se dvěma novými
+veřejnými stránkami. Nejdřív databáze: spusťte v Supabase SQL Editoru
+soubor `supabase/migration_menu.sql` (přidá tabulky pro menu, nic
+nesmaže).
+
+Jak to funguje:
+- **`/admin/nazev-firmy/menu`** — editor menu. Přidáte kategorie
+  (např. "Předkrmy", "Hlavní jídla") a do nich položky s názvem,
+  volitelným popisem a cenou.
+- **`/m/nazev-firmy`** — veřejná stránka s hezky vysázeným menu podle
+  kategorií, s tlačítkem "Ohodnotit návštěvu" dole.
+- **`/c/nazev-firmy`** — nová "rozcestníková" stránka se dvěma
+  tlačítky nahoře: Menu a Ohodnotit nás. Tohle je adresa, kterou
+  napíšete na NFC kartu/QR kód u klientů, co chtějí obojí.
+
+Klienti, kteří menu nechtějí, fungují úplně stejně jako doteď — jejich
+karta pořád vede rovnou na `/r/nazev-firmy`.
+
+V `/admin/nfc` teď při výběru klienta navíc zvolíte, jestli se má na
+kartu zapsat "Jen hodnocení" (`/r/slug`) nebo "Menu + hodnocení"
+(`/c/slug`).
+
 ## Co v systému záměrně (zatím) není
 - Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
   neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy
