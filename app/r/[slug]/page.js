@@ -1,14 +1,46 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+const T = {
+  cs: {
+    question: 'Jak byste ohodnotili vaši dnešní návštěvu?',
+    sorry: 'Je nám líto, že to dnes nebylo stoprocentní. Napište nám prosím, co se stalo — majitel to uvidí přímo.',
+    namePlaceholder: 'Vaše jméno (nepovinné)',
+    messagePlaceholder: 'Co bychom měli zlepšit?',
+    sending: 'Odesílám…',
+    send: 'Odeslat zprávu',
+    thanks: 'Díky za zpětnou vazbu, předáme ji dál majiteli.',
+    notFound: 'Tuto stránku jsme nenašli.',
+    loading: 'Načítám…',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    website: 'Web'
+  },
+  en: {
+    question: 'How would you rate your visit today?',
+    sorry: "We're sorry today wasn't perfect. Please tell us what happened — the owner will see it directly.",
+    namePlaceholder: 'Your name (optional)',
+    messagePlaceholder: 'What should we improve?',
+    sending: 'Sending…',
+    send: 'Send message',
+    thanks: "Thanks for the feedback, we'll pass it on to the owner.",
+    notFound: "We couldn't find this page.",
+    loading: 'Loading…',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    website: 'Website'
+  }
+};
+
 const SOCIALS = [
-  { key: 'instagram_url', label: 'Instagram' },
-  { key: 'facebook_url', label: 'Facebook' },
-  { key: 'website_url', label: 'Web' }
+  { key: 'instagram_url', label: 'instagram' },
+  { key: 'facebook_url', label: 'facebook' },
+  { key: 'website_url', label: 'website' }
 ];
 
 export default function ReviewPage({ params }) {
   const { slug } = params;
+  const [lang, setLang] = useState('cs');
   const [biz, setBiz] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [stars, setStars] = useState(0);
@@ -19,11 +51,20 @@ export default function ReviewPage({ params }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    const browserLang = typeof navigator !== 'undefined' ? navigator.language : '';
+    if (browserLang && !browserLang.toLowerCase().startsWith('cs') && !browserLang.toLowerCase().startsWith('sk')) {
+      setLang('en');
+    }
+  }, []);
+
+  useEffect(() => {
     fetch('/api/business/' + slug)
       .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
       .then(setBiz)
       .catch(() => setNotFound(true));
   }, [slug]);
+
+  const t = T[lang];
 
   async function pick(n) {
     setStars(n);
@@ -51,8 +92,8 @@ export default function ReviewPage({ params }) {
     setSent(true);
   }
 
-  if (notFound) return <div className="wrap"><div className="card">Tuto stránku jsme nenašli.</div></div>;
-  if (!biz) return <div className="wrap"><div className="card">Načítám…</div></div>;
+  if (notFound) return <div className="wrap"><div className="card">{t.notFound}</div></div>;
+  if (!biz) return <div className="wrap"><div className="card">{t.loading}</div></div>;
 
   const accent = biz.accent_color || '#2F7DFF';
   const socials = SOCIALS.filter(s => biz[s.key]);
@@ -60,6 +101,17 @@ export default function ReviewPage({ params }) {
   return (
     <div className="wrap" style={{ '--accent': accent }}>
       <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+          <button
+            type="button"
+            onClick={() => setLang(l => (l === 'cs' ? 'en' : 'cs'))}
+            style={{
+              border: '1px solid var(--line)', borderRadius: 999, padding: '4px 12px',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', background: 'transparent', color: 'var(--muted)'
+            }}
+          >{lang === 'cs' ? 'EN' : 'CZ'}</button>
+        </div>
+
         {biz.logo_url && (
           <img
             src={biz.logo_url}
@@ -71,7 +123,7 @@ export default function ReviewPage({ params }) {
 
         {!showForm && !sent && (
           <>
-            <p className="sub" style={{ textAlign: 'center' }}>Jak byste ohodnotili vaši dnešní návštěvu?</p>
+            <p className="sub" style={{ textAlign: 'center' }}>{t.question}</p>
             <div className="stars">
               {[1, 2, 3, 4, 5].map(n => (
                 <button
@@ -79,7 +131,7 @@ export default function ReviewPage({ params }) {
                   type="button"
                   className={'star' + (n <= stars ? ' active' : '')}
                   onClick={() => pick(n)}
-                  aria-label={n + ' hvězdiček'}
+                  aria-label={n + ' / 5'}
                   style={n <= stars ? { color: accent } : undefined}
                 >★</button>
               ))}
@@ -89,27 +141,27 @@ export default function ReviewPage({ params }) {
 
         {showForm && !sent && (
           <form onSubmit={submitFeedback}>
-            <p className="sub">Je nám líto, že to dnes nebylo stoprocentní. Napište nám prosím, co se stalo — majitel to uvidí přímo.</p>
+            <p className="sub">{t.sorry}</p>
             <input
               type="text"
-              placeholder="Vaše jméno (nepovinné)"
+              placeholder={t.namePlaceholder}
               value={name}
               onChange={e => setName(e.target.value)}
             />
             <textarea
               rows="4"
-              placeholder="Co bychom měli zlepšit?"
+              placeholder={t.messagePlaceholder}
               value={message}
               onChange={e => setMessage(e.target.value)}
               required
             />
             <button className="primary" type="submit" disabled={saving} style={{ background: accent }}>
-              {saving ? 'Odesílám…' : 'Odeslat zprávu'}
+              {saving ? t.sending : t.send}
             </button>
           </form>
         )}
 
-        {sent && <p style={{ textAlign: 'center' }}>Díky za zpětnou vazbu, předáme ji dál majiteli.</p>}
+        {sent && <p style={{ textAlign: 'center' }}>{t.thanks}</p>}
 
         {socials.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 22, flexWrap: 'wrap' }}>
@@ -123,7 +175,7 @@ export default function ReviewPage({ params }) {
                   fontSize: 13, fontWeight: 700, textDecoration: 'none', color: accent,
                   border: '1px solid var(--line)', borderRadius: 999, padding: '6px 14px'
                 }}
-              >{s.label}</a>
+              >{t[s.label]}</a>
             ))}
           </div>
         )}

@@ -125,6 +125,13 @@ Co to přidává:
   hledání podle jména firmy a rozbalovací nabídka pro řazení (nejnovější
   / podle jména / podle aktivity za posledních 7 dní).
 
+## Krok 10 — přepínač jazyka (CZ/EN)
+Recenzní stránka (`/r/nazev-firmy`) teď automaticky zvolí jazyk podle
+telefonu zákazníka (čeština/slovenština → čeština, cokoliv jiného →
+angličtina) a navíc jde ručně přepnout tlačítkem CZ/EN nahoře na
+stránce. Nevyžaduje to žádnou databázovou migraci ani nové proměnné —
+stačí nahrát nový kód.
+
 ## Co v systému záměrně (zatím) není
 - Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
   neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy
