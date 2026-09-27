@@ -1,36 +1,59 @@
--- Review SaaS – schema v2
--- Tento skript je bezpečné spustit i nad databází, kde už tabulky existují.
--- Nic nemaže, jen vytvoří chybějící tabulky/sloupce.
+create extension if not exists "pgcrypto";
 
-create extension if not exists pgcrypto;
-
--- BUSINESSES -----------------------------------------------------
-create table if not exists businesses (
+create table businesses (
   id uuid primary key default gen_random_uuid(),
-  name text not null,
   slug text unique not null,
-  created_at timestamptz not null default now()
+  name text not null,
+  google_review_url text not null,
+  owner_email text not null,
+  logo_url text,
+  instagram_url text,
+  facebook_url text,
+  website_url text,
+  accent_color text default '#2F7DFF',
+  plan text default 'basic',
+  stripe_customer_id text,
+  created_at timestamptz default now()
 );
 
-alter table businesses add column if not exists google_review_link text;
-alter table businesses add column if not exists notify_email text;
-alter table businesses add column if not exists plan text not null default 'nfc';
-alter table businesses add column if not exists status text not null default 'trial';
-alter table businesses add column if not exists brand_color text not null default '#2563eb';
-alter table businesses add column if not exists weekly_digest boolean not null default false;
-alter table businesses add column if not exists monthly_digest boolean not null default false;
-
--- FEEDBACK ---------------------------------------------------------
-create table if not exists feedback (
+create table feedback (
   id uuid primary key default gen_random_uuid(),
   business_id uuid references businesses(id) on delete cascade,
-  rating smallint not null,
-  created_at timestamptz not null default now()
+  stars int not null check (stars between 1 and 5),
+  customer_name text,
+  message text,
+  resolved boolean default false,
+  resolved_at timestamptz,
+  created_at timestamptz default now()
 );
 
-alter table feedback add column if not exists message text;
-alter table feedback add column if not exists tags text[] default '{}';
-alter table feedback add column if not exists resolved boolean not null default false;
+create index feedback_business_id_idx on feedback(business_id);
+create index feedback_created_at_idx on feedback(created_at);
 
-create index if not exists feedback_business_id_idx on feedback(business_id);
-create index if not exists feedback_created_at_idx on feedback(created_at);
+create table menu_categories (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid references businesses(id) on delete cascade,
+  name text not null,
+  sort_order int not null default 0,
+  created_at timestamptz default now()
+);
+
+create table menu_items (
+  id uuid primary key default gen_random_uuid(),
+  category_id uuid references menu_categories(id) on delete cascade,
+  name text not null,
+  description text,
+  price_czk int,
+  sort_order int not null default 0,
+  created_at timestamptz default now()
+);
+
+create index menu_categories_business_id_idx on menu_categories(business_id);
+create index menu_items_category_id_idx on menu_items(category_id);
+
+-- Service role klíč (používaný serverem) obchází RLS, takže tabulky
+-- zůstávají bez veřejných policies -- nikdo zvenčí je nemůže číst přímo.
+alter table businesses enable row level security;
+alter table feedback enable row level security;
+alter table menu_categories enable row level security;
+alter table menu_items enable row level security;
