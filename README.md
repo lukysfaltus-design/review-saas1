@@ -1,203 +1,89 @@
-# Recenzní systém — přesný postup
+# Review systém — verze 2
 
-Systém dělá tři věci: zákazník ohodnotí 1-5 hvězdami na stránce
-`/r/nazev-firmy`, 4-5 hvězd ho pošle rovnou na Google recenze, méně než
-4 zobrazí formulář na zprávu — a jakmile ji zákazník odešle, přijde vám
-o tom hned e-mail. Žádné týdenní souhrny, žádné plánování — jednoduše
-zpráva dorazí v okamžiku, kdy ji zákazník napíše.
+## Co je nového
 
-Postupujte přesně v tomhle pořadí. Každý krok potřebuje ten předchozí.
+**Opravená chyba z verze 1:** Dřív měla celá aplikace jednu sdílenou adresu
+(`NOTIFY_EMAIL`), na kterou chodily zprávy úplně od všech klientů. Od teď má
+**každý klient svůj vlastní e-mail majitele** — nastavíte ho při vytvoření
+klienta nebo kdykoliv později v jeho detailu. Tohle je nutná změna, pokud
+chcete prodávat víc než jednomu podniku.
 
----
+**Nové funkce:**
+- **Detail klienta** (`/admin/business/[id]`) — úprava všech údajů, graf
+  hodnocení za posledních 7 dní, seznam veškeré zpětné vazby s možností
+  označit položku jako „vyřešeno“
+- **Export do CSV** — stáhnete si veškerou zpětnou vazbu klienta jako
+  tabulku (např. pro účetnictví nebo archiv)
+- **Kategorie stížností** — zákazník při nízkém hodnocení vybere štítky
+  (Dlouhé čekání, Nepříjemný personál, Špatná kvalita...), takže hned vidíte,
+  na čem nejvíc záleží
+- **Automatické týdenní/měsíční souhrny e-mailem** — přesně funkce, kterou
+  jste chtěl prodávat u dražších balíčků. Běží samo na pozadí (Vercel Cron),
+  nemusíte nic ručně spouštět
+- **QR kód** — vedle NFC karty se teď automaticky vygeneruje i QR kód k
+  vytištění (např. na stůl), pro případ, že zákazník nemá NFC telefon
+  nebo chcete kartu doplnit
+- **Barva podle klienta** — každá firma může mít vlastní barvu na své
+  recenzní stránce
+- **Dvojjazyčnost CZ/EN** — přepínač jazyka na recenzní stránce
+- **Vyhledávání a přehledové statistiky** v adminu (počet klientů, aktivní
+  klienti, hodnocení za týden, celkový průměr)
+- **Kompletně nový vizuální design** administrace i zákaznické stránky
 
-## Krok 1 — Supabase (databáze)
-1. Jděte na **supabase.com** → New project. Zvolte region Frankfurt.
-2. Počkejte, až se projekt vytvoří (cca minuta).
-3. V levém menu klikněte na **SQL Editor** → **New query**.
-4. Otevřete v tomhle balíčku soubor `supabase/schema.sql`, zkopírujte
-   celý jeho obsah, vložte ho do editoru a klikněte **Run**.
-5. Jděte na **Project Settings** (ozubené kolo) → **API**.
-6. Zkopírujte si na později dvě hodnoty:
-   - **Project URL**
-   - **service_role** klíč (je pod "Project API keys" — pozor, je jich
-     tam víc, chcete `service_role`, ne `anon`)
+## Než nahrajete — DŮLEŽITÉ
 
-## Krok 2 — Resend (odesílání e-mailů)
-1. Jděte na **resend.com** → založte účet.
-2. V menu **API Keys** → **Create API Key**. Zkopírujte si ho, uvidíte
-   ho jen jednou.
-3. Nejjednodušší start: v Resendu použijte jejich testovací odesílací
-   adresu (mají to popsané po přihlášení, obvykle něco jako
-   `onboarding@resend.dev`) — na tu si zatím nastavte
-   `RESEND_FROM_EMAIL`. Až budete chtít posílat z vlastní domény, přidáte
-   si ji tam později (Domains → Add Domain), to není potřeba hned.
+Tohle je **kompletní přepis** celé aplikace (všechny stránky, API, styly).
+Pokud jste si sám něco přidával do souborů, které se jmenují stejně jako ty
+v tomto ZIPu (např. jste upravoval `pages/admin/index.js`), **vaše úpravy se
+přepíšou**. Pokud jste přidával úplně nové soubory s jinými názvy, ty
+zůstanou nedotčené.
 
-## Krok 3 — kód na GitHub
-1. Rozbalte si tenhle .zip soubor na počítači.
-2. Na github.com založte nové **privátní** repo (prázdné, bez README).
-3. Nahrajte do něj obsah rozbalené složky — nejjednodušší je přes
-   GitHub Desktop (github.com/apps/desktop): otevřete appku, "Add
-   existing repository", vyberte složku, dejte commit a Push.
+**Doporučení:** pokud jste si něco upravoval, otevřete si to nejdřív a
+zkopírujte si tu úpravu bokem (do poznámkového bloku), ať ji pak můžete
+znovu doplnit.
 
-## Krok 4 — Vercel (kde appka poběží)
-1. Jděte na **vercel.com** → přihlaste se přes GitHub účet.
-2. **Add New → Project** → vyberte repo z kroku 3.
-3. Než kliknete Deploy, rozbalte **Environment Variables** a vyplňte
-   přesně tyhle (hodnoty máte z kroků 1 a 2):
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `RESEND_API_KEY`
-   - `RESEND_FROM_EMAIL`
-   - `NOTIFY_EMAIL` — váš e-mail (nebo sdílenou schránku), kam mají
-     chodit zprávy od zákazníků
-   - `ADMIN_PASSWORD` — heslo, kterým se přihlásíte do administrace
-     (uživatelské jméno bude vždy `admin`)
-4. Klikněte **Deploy**. Za 1-2 minuty dostanete adresu typu
-   `https://vas-projekt.vercel.app`.
+## Krok za krokem — GitHub Desktop
 
-## Krok 5 — přidat prvního klienta
-1. Otevřete `https://vas-projekt.vercel.app/admin` — prohlížeč se
-   zeptá na jméno (`admin`) a heslo (co jste dali do `ADMIN_PASSWORD`).
-2. Klikněte **+ Nový klient**. Vyplňte:
-   - Název firmy
-   - Slug (krátký odkaz bez mezer a diakritiky, např. `kavarna-modra`)
-   - Odkaz na Google recenze té firmy
-   - E-mail majitele (zatím se nikde automaticky nepoužívá, jen se
-     uloží pro budoucí použití)
-3. Uložit.
+1. V GitHub Desktopu klikněte na váš repozitář **review-saas** vlevo nahoře,
+   pak **Repository → Show in Explorer** (nebo ikonka složky)
+2. Otevře se složka s vaším projektem na disku
+3. Rozbalte ZIP, který jsem vám poslal, do jiné složky (např. na Plochu)
+4. Otevřete tu rozbalenou složku a označte v ní **všechny soubory a
+   podsložky** (Ctrl+A)
+5. Přetáhněte je do té složky projektu, kterou vám otevřel GitHub Desktop
+6. Windows se zeptá „Chcete nahradit tyto soubory?“ — klikněte **Ano,
+   nahradit soubory v cílové složce**
+7. Přepněte se zpátky do **GitHub Desktop** — v záložce **Changes** uvidíte
+   seznam všech změněných/přidaných souborů
+8. Dole vlevo napište krátký popis, např. `Verze 2 - nove funkce`
+9. Klikněte na **Commit to main**
+10. Nahoře klikněte na **Push origin** (odešle změny na GitHub)
+11. Vercel automaticky zachytí změnu na GitHubu a **sám znovu nasadí** web
+    (během minuty). Nemusíte dělat nic dalšího ve Vercelu.
 
-## Krok 6 — vyzkoušet, že to celé funguje
-1. Otevřete `https://vas-projekt.vercel.app/r/kavarna-modra` (vlastní
-   slug klienta).
-2. Klikněte na 5 hvězd → mělo by vás to přesměrovat na Google recenze.
-3. Vraťte se zpátky, otevřete stránku znovu, tentokrát klikněte na
-   2 hvězdy → objeví se textové pole. Napište libovolnou zprávu a
-   odešlete.
-4. Zkontrolujte e-mail na adrese, kterou jste dali do `NOTIFY_EMAIL` —
-   měla by tam do pár vteřin dorazit zpráva s názvem firmy a textem.
+## Krok za krokem — databáze (Supabase)
 
-Pokud e-mail nedorazí: nejčastější příčina je, že v Resendu ještě
-nemáte ověřenou žádnou odesílací adresu — zkontrolujte v Resend
-dashboardu záložku **Logs**, tam uvidíte přesně, proč se e-mail
-nepodařilo odeslat.
+Musíte spustit aktualizované schéma, jinak nové sloupce (e-mail klienta,
+barva, balíček...) nebudou v databázi existovat:
 
-## Krok 7 — NFC karta pro klienta
-Na Androidu v Chrome otevřete `/admin/nfc`, vyberte klienta ze
-seznamu, přiložte prázdnou NFC kartu k zadní straně telefonu a
-klikněte na tlačítko pro zápis. Na iPhonu tohle web spustit nemůže —
-tam by bylo potřeba URL zapsat ručně přes appku jako NFC Tools.
+1. Otevřete `https://supabase.com/dashboard/project/VÁŠ_PROJEKT/sql/new`
+2. Otevřete soubor `supabase/schema.sql` z tohoto ZIPu, zkopírujte celý
+   obsah
+3. Vložte do SQL Editoru a klikněte **Run**
+4. Tenhle skript **nic nemaže** — jen doplní chybějící sloupce a tabulky,
+   takže je bezpečné ho spustit i nad vaší současnou databází
 
----
+## Proměnné prostředí (Vercel)
 
-## Krok 8 — logo, sociální sítě a barva podniku
-V databázi teď navíc existují sloupce pro logo, Instagram, Facebook, web
-a barvu (accent_color). Pokud jste `schema.sql` spouštěl už dřív (před
-touhle změnou), spusťte navíc v Supabase SQL Editoru soubor
-`supabase/migration_branding.sql` — jen doplní chybějící sloupce, nic
-nesmaže.
+Beze změny oproti verzi 1, jen `NOTIFY_EMAIL` už není potřeba (viz výše —
+teď se nastavuje za každého klienta zvlášť). Zkontrolujte prosím, že
+zbylých 5 proměnných je ve Vercelu správně vyplněných (viz `.env.example`
+v tomto ZIPu).
 
-V adminu pak u konkrétního klienta (`/admin/nazev-firmy`) klikněte na
-"Upravit logo, sociální sítě a barvu" a doplňte:
-- odkaz na obrázek loga (musí to být přímý odkaz na obrázek, končící
-  např. na `.png` nebo `.jpg` — nejjednodušší je nahrát logo někam jako
-  imgur.com a zkopírovat si přímý odkaz)
-- odkazy na Instagram / Facebook / web
-- barvu v HEX formátu (např. `#E63946`), použije se na hvězdičky a
-  tlačítko
+## Jedna technická poznámka k automatickým souhrnům
 
-Po uložení se to hned projeví na `/r/nazev-firmy`.
-
-## Krok 9 — vyřešené zprávy, hledání a export
-V databázi přibyl u zpráv sloupec "vyřešeno". Pokud jste `schema.sql`
-spouštěli už dřív, spusťte navíc v Supabase SQL Editoru soubor
-`supabase/migration_resolved.sql` (opět jen doplní sloupec, nic
-nesmaže).
-
-Co to přidává:
-- **U detailu klienta** (`/admin/nazev-firmy`) je teď nahoře přepínač
-  Nevyřešené / Vyřešené / Vše, a u každé zprávy tlačítko "Označit jako
-  vyřešené". Ve výchozím stavu se ukazují jen nevyřešené, ať se vám
-  inbox nezaplní starými věcmi.
-- **Tlačítko "Stáhnout CSV"** na téže stránce — stáhne všechny zprávy
-  daného klienta (datum, hvězdy, jméno, text, stav) jako soubor, který
-  jde rovnou otevřít v Excelu.
-- **Hledání a řazení** na hlavní stránce `/admin` — políčko pro
-  hledání podle jména firmy a rozbalovací nabídka pro řazení (nejnovější
-  / podle jména / podle aktivity za posledních 7 dní).
-
-## Krok 10 — přepínač jazyka (CZ/EN)
-Recenzní stránka (`/r/nazev-firmy`) teď automaticky zvolí jazyk podle
-telefonu zákazníka (čeština/slovenština → čeština, cokoliv jiného →
-angličtina) a navíc jde ručně přepnout tlačítkem CZ/EN nahoře na
-stránce. Nevyžaduje to žádnou databázovou migraci ani nové proměnné —
-stačí nahrát nový kód.
-
-## Krok 11 — menu na kartě
-Přidal jsem plnohodnotné menu, editovatelné v adminu, se dvěma novými
-veřejnými stránkami. Nejdřív databáze: spusťte v Supabase SQL Editoru
-soubor `supabase/migration_menu.sql` (přidá tabulky pro menu, nic
-nesmaže).
-
-Jak to funguje:
-- **`/admin/nazev-firmy/menu`** — editor menu. Přidáte kategorie
-  (např. "Předkrmy", "Hlavní jídla") a do nich položky s názvem,
-  volitelným popisem a cenou.
-- **`/m/nazev-firmy`** — veřejná stránka s hezky vysázeným menu podle
-  kategorií, s tlačítkem "Ohodnotit návštěvu" dole.
-- **`/c/nazev-firmy`** — nová "rozcestníková" stránka se dvěma
-  tlačítky nahoře: Menu a Ohodnotit nás. Tohle je adresa, kterou
-  napíšete na NFC kartu/QR kód u klientů, co chtějí obojí.
-
-Klienti, kteří menu nechtějí, fungují úplně stejně jako doteď — jejich
-karta pořád vede rovnou na `/r/nazev-firmy`.
-
-V `/admin/nfc` teď při výběru klienta navíc zvolíte, jestli se má na
-kartu zapsat "Jen hodnocení" (`/r/slug`) nebo "Menu + hodnocení"
-(`/c/slug`).
-
-## Krok 12 — oprava vytrvalé cache na /admin
-Narazili jsme na to, že se `/admin` stránka nebo API někdy servírovaly
-ze staré mezipaměti i po tvrdém refreshi v prohlížeči (nový klient se
-neukázal, i když byl v databázi). Přidal jsem do všech admin stránek a
-API endpointů výslovné direktivy, které tohle napevno vypínají. Není
-potřeba žádná databázová změna, stačí nahrát nový kód.
-
-## Krok 13 — jazyk všude, ne jen na hodnocení
-Přepínač CZ/EN teď funguje na všech třech zákaznických stránkách —
-hodnocení (`/r/slug`), menu (`/m/slug`) i rozcestník (`/c/slug`).
-Administrace (`/admin/...`) zůstává česky, tu používáte jen vy dva.
-Žádná databázová migrace není potřeba, jen nahrát nový kód.
-
-## Krok 14 — barva a logo z fotky
-Ve formuláři pro přidání/úpravu klienta (`/admin/new` a
-`/admin/nazev-firmy/edit`) je teď navíc možnost nahrát fotku (logo
-podniku, fotku interiéru apod.). Prohlížeč z ní automaticky:
-- vytvoří zmenšenou verzi a použije ji jako logo (žádný imgur ani
-  externí hosting není potřeba, obrázek se uloží rovnou v databázi),
-- najde nejvýraznější barvu na fotce a nastaví ji jako barvu podniku.
-
-Barvu i logo jde po nahrání fotky pořád ručně přebít, kdyby se
-nevytáhla přesně to, co chcete. Žádná databázová migrace není
-potřeba, jen nahrát nový kód.
-
-## Krok 15 — kompletní redesign
-Přepracoval jsem vizuál celého systému, ne jen jednu stránku:
-- **Zákaznické stránky** (`/r`, `/m`, `/c`) mají teď teplou paletu,
-  pořádné písmo (Fraunces pro nadpisy, Inter pro zbytek — předtím se
-  žádný font ve skutečnosti nenačítal) a barva podniku se propisuje do
-  celé stránky (pozadí, nadpis, pruh na kartě), ne jen do jednoho
-  tlačítka.
-- **Administrace** (`/admin/...`) má vlastní, chladnější a věcnější
-  paletu — je to interní nástroj pro vás dva, tak nemá smysl, aby se
-  měnil podle barvy klienta.
-
-Žádná databázová migrace není potřeba, jde jen o kód (CSS a layout).
-
-## Co v systému záměrně (zatím) není
-- Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
-  neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy
-  přijdou. Až budete chtít klientům posílat přehledy, dá se to doplnit.
-- Stripe platby — databáze má na to připravený sloupec, napojení
-  zatím chybí.
-- Přihlášení pro majitele klientů — teď do administrace vidíte jen vy
-  dva (chránění heslem).
+Vercel Cron na bezplatném (Hobby) plánu umožňuje spouštění max. jednou
+denně — přesně to tenhle systém využívá (kontroluje jednou denně v 7:00,
+jestli je pondělí nebo první den v měsíci, a podle toho pošle týdenní/
+měsíční souhrn). Nic dalšího nastavovat nemusíte, funguje to automaticky
+po nasazení.

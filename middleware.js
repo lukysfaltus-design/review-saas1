@@ -1,18 +1,19 @@
+import { NextResponse } from 'next/server';
+
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*']
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 };
 
 export function middleware(req) {
-  const auth = req.headers.get('authorization');
-  const pass = process.env.ADMIN_PASSWORD || '';
-  const expected = 'Basic ' + btoa('admin:' + pass);
+  const authHeader = req.headers.get('authorization');
+  const expected = 'Basic ' + btoa('admin:' + process.env.ADMIN_PASSWORD);
 
-  if (auth === expected) {
-    return;
+  if (authHeader === expected) {
+    return NextResponse.next();
   }
 
-  return new Response('Auth required', {
+  return new NextResponse('Autentizace vyžadována.', {
     status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="Admin"' }
+    headers: { 'WWW-Authenticate': 'Basic realm="Administrace"' },
   });
 }
