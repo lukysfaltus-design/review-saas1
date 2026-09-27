@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { T, detectLang } from '@/lib/i18n';
+import { lightenHex } from '@/lib/theme';
 import LangToggle from '../../LangToggle';
 
 export default function MenuPage({ params }) {
@@ -21,6 +22,13 @@ export default function MenuPage({ params }) {
   const t = T[lang].menu;
   const c = T[lang].common;
 
+  useEffect(() => {
+    if (!data) return;
+    const accent = data.business.accent_color || '#2F7DFF';
+    document.body.style.background = `linear-gradient(180deg, ${lightenHex(accent, 0.86)}, ${lightenHex(accent, 0.94)} 260px, var(--bg) 480px)`;
+    return () => { document.body.style.background = ''; };
+  }, [data]);
+
   if (notFound) return <div className="wrap"><div className="card">{c.notFound}</div></div>;
   if (!data) return <div className="wrap"><div className="card">{c.loading}</div></div>;
 
@@ -28,17 +36,17 @@ export default function MenuPage({ params }) {
 
   return (
     <div className="wrap" style={{ '--accent': accent }}>
-      <div className="card">
+      <div className="card" style={{ borderTop: `6px solid ${accent}` }}>
         <LangToggle lang={lang} setLang={setLang} />
 
         {data.business.logo_url && (
           <img
             src={data.business.logo_url}
             alt={data.business.name + ' logo'}
-            style={{ display: 'block', maxWidth: 160, maxHeight: 90, objectFit: 'contain', margin: '0 auto 14px' }}
+            style={{ display: 'block', maxWidth: 180, maxHeight: 100, objectFit: 'contain', margin: '0 auto 14px', borderRadius: 10 }}
           />
         )}
-        <h1 style={{ textAlign: 'center' }}>{data.business.name}</h1>
+        <h1 style={{ textAlign: 'center', color: accent }}>{data.business.name}</h1>
         <p className="sub" style={{ textAlign: 'center' }}>{t.label}</p>
 
         {data.categories.length === 0 && (

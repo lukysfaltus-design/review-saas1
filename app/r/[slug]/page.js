@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { T, detectLang } from '@/lib/i18n';
+import { lightenHex } from '@/lib/theme';
 import LangToggle from '../../LangToggle';
 
 const SOCIALS = ['instagram_url', 'facebook_url', 'website_url'];
@@ -29,6 +30,13 @@ export default function ReviewPage({ params }) {
 
   const t = T[lang].review;
   const c = T[lang].common;
+
+  useEffect(() => {
+    if (!biz) return;
+    const accent = biz.accent_color || '#2F7DFF';
+    document.body.style.background = `linear-gradient(180deg, ${lightenHex(accent, 0.86)}, ${lightenHex(accent, 0.94)} 260px, var(--bg) 480px)`;
+    return () => { document.body.style.background = ''; };
+  }, [biz]);
 
   async function pick(n) {
     setStars(n);
@@ -64,17 +72,17 @@ export default function ReviewPage({ params }) {
 
   return (
     <div className="wrap" style={{ '--accent': accent }}>
-      <div className="card">
+      <div className="card" style={{ borderTop: `6px solid ${accent}` }}>
         <LangToggle lang={lang} setLang={setLang} />
 
         {biz.logo_url && (
           <img
             src={biz.logo_url}
             alt={biz.name + ' logo'}
-            style={{ display: 'block', maxWidth: 160, maxHeight: 90, objectFit: 'contain', margin: '0 auto 14px' }}
+            style={{ display: 'block', maxWidth: 180, maxHeight: 100, objectFit: 'contain', margin: '0 auto 14px', borderRadius: 10 }}
           />
         )}
-        <h1 style={{ textAlign: 'center' }}>{biz.name}</h1>
+        <h1 style={{ textAlign: 'center', color: accent }}>{biz.name}</h1>
 
         {!showForm && !sent && (
           <>

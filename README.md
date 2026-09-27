@@ -180,6 +180,19 @@ Barvu i logo jde po nahrání fotky pořád ručně přebít, kdyby se
 nevytáhla přesně to, co chcete. Žádná databázová migrace není
 potřeba, jen nahrát nový kód.
 
+## Krok 15 — kompletní redesign
+Přepracoval jsem vizuál celého systému, ne jen jednu stránku:
+- **Zákaznické stránky** (`/r`, `/m`, `/c`) mají teď teplou paletu,
+  pořádné písmo (Fraunces pro nadpisy, Inter pro zbytek — předtím se
+  žádný font ve skutečnosti nenačítal) a barva podniku se propisuje do
+  celé stránky (pozadí, nadpis, pruh na kartě), ne jen do jednoho
+  tlačítka.
+- **Administrace** (`/admin/...`) má vlastní, chladnější a věcnější
+  paletu — je to interní nástroj pro vás dva, tak nemá smysl, aby se
+  měnil podle barvy klienta.
+
+Žádná databázová migrace není potřeba, jde jen o kód (CSS a layout).
+
 ## Co v systému záměrně (zatím) není
 - Týdenní souhrny pro majitele klientů — řekli jste, že to zatím
   neřešíme, takže tahle appka jen posílá zprávy vám v momentě, kdy
